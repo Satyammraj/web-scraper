@@ -1,6 +1,34 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Home.css";
+
+const iconProps = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.7,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": "true",
+};
+
+function GlobeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3c2.6 2.6 4 5.6 4 9s-1.4 6.4-4 9c-2.6-2.6-4-5.6-4-9s1.4-6.4 4-9z" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" {...iconProps} strokeWidth="2">
+      <path d="M5 12h14" />
+      <path d="M13 6l6 6-6 6" />
+    </svg>
+  );
+}
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -45,23 +73,18 @@ export default function Home() {
     };
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/scrapes",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(sampleData),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/scrapes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(sampleData),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to save the result."
-        );
+        throw new Error(data.message || "Failed to save the result.");
       }
 
       navigate(`/results/${data.record._id}`);
@@ -84,113 +107,157 @@ export default function Home() {
   }
 
   return (
-    <main className="page-container">
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow">YOUR WEB DATA TOOLKIT</span>
-          <h1>Web Scraper<span>.</span></h1>
+    <main className="hm">
+      {/* Hero */}
+      <section className="hm-hero">
+        <div className="hm-copy">
+          <span className="hm-eyebrow">Web Data Toolkit</span>
 
-          <p>
-            Turn website URLs into organized information.
-            Explore page titles, headings and links in one place.
+          <h1 className="hm-title">
+            See the structure of <em>any</em> website.
+          </h1>
+
+          <p className="hm-lead">
+            Paste a web address and get its page title, headings and links
+            in one clear report. Every result is saved to your history.
           </p>
 
-          <div className="hero-points">
-            <span>✓ Simple to use</span>
-            <span>✓ Organized results</span>
-            <span>✓ History at a glance</span>
-          </div>
+          <form className="hm-search" onSubmit={handleScrape} noValidate>
+            <label htmlFor="website-url" className="hm-sr">
+              Website address
+            </label>
+
+            <div className={`hm-field ${error ? "is-error" : ""}`}>
+              <span className="hm-field-icon"><GlobeIcon /></span>
+              <input
+                id="website-url"
+                type="text"
+                placeholder="https://example.com"
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                autoComplete="off"
+              />
+              {url && (
+                <button
+                  type="button"
+                  className="hm-clear"
+                  onClick={handleClear}
+                >
+                  Clear
+                </button>
+              )}
+              <button className="hm-submit" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <span className="hm-spinner"></span>
+                    Processing
+                  </>
+                ) : (
+                  <>
+                    Scrape <ArrowIcon />
+                  </>
+                )}
+              </button>
+            </div>
+
+            {error && <p className="hm-error" role="alert">{error}</p>}
+          </form>
+
+          <p className="hm-note">
+            Demo mode: results are sample data, not live website content.
+          </p>
         </div>
 
-        <div className="hero-art" aria-hidden="true">
-          <div className="orbit orbit-one"></div>
-          <div className="orbit orbit-two"></div>
-          <div className="globe">◎</div>
-
-          <div className="code-card">
-            <span>WEB DATA</span>
-            <div>{"<html>"}</div>
-            <div>{"<h1>..."}</div>
-            <div>{"<a href>"}</div>
-            <div>{"</html>"}</div>
+        {/* Sample report preview */}
+        <div className="hm-report" aria-hidden="true">
+          <div className="hm-report-head">
+            <span className="hm-report-label">Sample report</span>
+            <span className="hm-report-url">example.com</span>
           </div>
 
-          <div className="floating-dot dot-one"></div>
-          <div className="floating-dot dot-two"></div>
+          <div className="hm-report-block">
+            <span className="hm-report-key">Page title</span>
+            <p>Example Domain | Sample Website</p>
+          </div>
+
+          <div className="hm-report-block">
+            <span className="hm-report-key">Headings</span>
+            <ul>
+              <li><b>H1</b> Welcome to example.com</li>
+              <li><b>H2</b> About Us</li>
+              <li><b>H2</b> Our Services</li>
+            </ul>
+          </div>
+
+          <div className="hm-report-block">
+            <span className="hm-report-key">Links</span>
+            <ul>
+              <li><b>01</b> /about</li>
+              <li><b>02</b> /contact</li>
+            </ul>
+          </div>
         </div>
       </section>
 
-      <section className="scrape-card">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">GET STARTED</span>
-            <h2>Enter a website URL</h2>
-          </div>
-          <span className="url-symbol">↗</span>
-        </div>
-
-        <form onSubmit={handleScrape}>
-          <label htmlFor="website-url">Website address</label>
-
-          <div className="input-wrap">
-            <span>🌐</span>
-            <input
-              id="website-url"
-              type="text"
-              placeholder="https://example.com"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-            />
-          </div>
-
-          {error && <p className="error-message">{error}</p>}
-
-          <div className="form-actions">
-            <button
-              className="primary-button"
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? "Processing..." : "⌕ Scrape Website"}
-            </button>
-
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={handleClear}
-            >
-              Clear
-            </button>
-          </div>
-        </form>
-
-        <p className="demo-note">
-          Demo mode: results are sample data, not live website content.
-        </p>
-      </section>
-
-      <section className="info-grid" id="about">
-        <article className="info-card">
-          <span className="info-icon">⌕</span>
+      {/* Steps */}
+      <section className="hm-steps">
+        <article>
+          <span className="hm-step-no">01</span>
           <h3>Enter a URL</h3>
           <p>Start with the website you want to inspect.</p>
         </article>
 
-        <article className="info-card">
-          <span className="info-icon">▤</span>
-          <h3>View the details</h3>
-          <p>Explore sample headings, links and page information.</p>
+        <article>
+          <span className="hm-step-no">02</span>
+          <h3>Review the report</h3>
+          <p>Browse headings, links and page details in one view.</p>
         </article>
 
-        <article className="info-card">
-          <span className="info-icon">◷</span>
-          <h3>Keep your history</h3>
-          <p>Revisit previous results from the History page.</p>
+        <article>
+          <span className="hm-step-no">03</span>
+          <h3>Return anytime</h3>
+          <p>Every result is stored in your History page.</p>
         </article>
       </section>
 
-      <footer className="footer">
-        Web Scraper · Minor Project · CSE 3395
+      {/* About */}
+      <section className="hm-about" id="about">
+        <div className="hm-about-copy">
+          <span className="hm-eyebrow">About</span>
+          <h2>About this project</h2>
+          <p>
+            Web Scraper is a minor project built for CSE 3395. It takes a
+            website address and turns it into a structured report covering
+            the page title, headings and links.
+          </p>
+          <p>
+            Each report is saved to a database, so you can open the History
+            page at any time and revisit earlier results.
+          </p>
+        </div>
+
+        <dl className="hm-about-list">
+          <div>
+            <dt>Course</dt>
+            <dd>CSE 3395 · Minor Project</dd>
+          </div>
+          <div>
+            <dt>Stack</dt>
+            <dd>React, Node.js, Express, MongoDB</dd>
+          </div>
+          <div>
+            <dt>Collects</dt>
+            <dd>Page title, headings, links</dd>
+          </div>
+          <div>
+            <dt>Mode</dt>
+            <dd>Demo (sample data)</dd>
+          </div>
+        </dl>
+      </section>
+
+      <footer className="hm-footer">
+        Web Scraper &nbsp;·&nbsp; Minor Project &nbsp;·&nbsp; CSE 3395
       </footer>
     </main>
   );
