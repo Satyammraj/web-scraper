@@ -6,7 +6,7 @@ export default function Navbar() {
     <nav className="navbar">
       <NavLink to="/" className="brand">
         <span className="brand-icon">⌘</span>
-        <span>Web Scraper</span>
+        <span>RestaurantWebScraper</span>
       </NavLink>
 
       <div className="nav-links">

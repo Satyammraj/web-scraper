@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
@@ -8,7 +9,7 @@ const iconProps = {
   strokeWidth: 1.7,
   strokeLinecap: "round",
   strokeLinejoin: "round",
-  "aria-hidden": "true",
+  "aria-hidden": true,
 };
 
 function GlobeIcon() {
@@ -34,7 +35,6 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   async function handleScrape(event) {
@@ -50,26 +50,54 @@ export default function Home() {
         throw new Error("Invalid protocol");
       }
     } catch {
-      setError("Please enter a valid website URL.");
+      setError("Please enter a valid restaurant website URL.");
       return;
     }
 
     setLoading(true);
 
+    // Demonstration data for a restaurant website.
+    // The assignment allows sample data instead of live scraping.
+    const restaurantName = website.hostname
+      .replace(/^www\./, "")
+      .split(".")[0]
+      .replace(/[-_]/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+
     const sampleData = {
       url: website.href,
-      pageTitle: website.hostname + " | Sample Website",
+      pageTitle: `${restaurantName} | Restaurant Information`,
       headings: [
-        "Welcome to " + website.hostname,
-        "About Us",
-        "Our Services",
+        `Restaurant: ${restaurantName}`,
+        "Cuisine: Multi-cuisine",
+        "Address: Sample restaurant address",
+        "Rating: 4.5/5 (sample)",
+        "Opening Hours: 10:00 AM - 10:00 PM (sample)",
+        "Menu and Specialties",
       ],
       links: [
-        { text: "Home", url: website.origin + "/" },
-        { text: "About", url: website.origin + "/about" },
-        { text: "Contact", url: website.origin + "/contact" },
+        { text: "Restaurant Home", url: website.origin + "/" },
+        { text: "Menu", url: website.origin + "/menu" },
+        { text: "Contact and Location", url: website.origin + "/contact" },
+        { text: "Reservations", url: website.origin + "/reservations" },
       ],
-      products: [],
+      products: [
+        {
+          name: "Signature Dish",
+          price: "₹299",
+          category: "Main Course",
+        },
+        {
+          name: "Chef's Special",
+          price: "₹399",
+          category: "Specialty",
+        },
+        {
+          name: "Dessert Special",
+          price: "₹149",
+          category: "Dessert",
+        },
+      ],
     };
 
     try {
@@ -89,7 +117,7 @@ export default function Home() {
 
       navigate(`/results/${data.record._id}`);
     } catch (error) {
-      console.error("Scrape request failed:", error);
+      console.error("Restaurant scrape request failed:", error);
 
       setError(
         error.message === "Failed to fetch"
@@ -108,35 +136,39 @@ export default function Home() {
 
   return (
     <main className="hm">
-      {/* Hero */}
       <section className="hm-hero">
         <div className="hm-copy">
-          <span className="hm-eyebrow">Web Data Toolkit</span>
+          <span className="hm-eyebrow">RESTAURANT DATA EXPLORER</span>
 
           <h1 className="hm-title">
-            See the structure of <em>any</em> website.
+            Discover what's on the <em>menu.</em>
           </h1>
 
           <p className="hm-lead">
-            Paste a web address and get its page title, headings and links
-            in one clear report. Every result is saved to your history.
+            Enter a restaurant website URL and explore organized information
+            about its cuisine, location, menu, and useful links.
+            Save your reports and revisit them through History.
           </p>
 
           <form className="hm-search" onSubmit={handleScrape} noValidate>
             <label htmlFor="website-url" className="hm-sr">
-              Website address
+              Restaurant website address
             </label>
 
             <div className={`hm-field ${error ? "is-error" : ""}`}>
-              <span className="hm-field-icon"><GlobeIcon /></span>
+              <span className="hm-field-icon">
+                <GlobeIcon />
+              </span>
+
               <input
                 id="website-url"
                 type="text"
-                placeholder="https://example.com"
+                placeholder="https://restaurant.example"
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
-                autoComplete="off"
+                autoComplete="url"
               />
+
               {url && (
                 <button
                   type="button"
@@ -146,93 +178,97 @@ export default function Home() {
                   Clear
                 </button>
               )}
+
               <button className="hm-submit" type="submit" disabled={loading}>
                 {loading ? (
                   <>
-                    <span className="hm-spinner"></span>
+                    <span className="hm-spinner" />
                     Processing
                   </>
                 ) : (
                   <>
-                    Scrape <ArrowIcon />
+                    Explore <ArrowIcon />
                   </>
                 )}
               </button>
             </div>
 
-            {error && <p className="hm-error" role="alert">{error}</p>}
+            {error && (
+              <p className="hm-error" role="alert">
+                {error}
+              </p>
+            )}
           </form>
 
           <p className="hm-note">
-            Demo mode: results are sample data, not live website content.
+            Demo mode: restaurant details and menu items are sample data,
+            not information extracted from the live website.
           </p>
         </div>
 
-        {/* Sample report preview */}
         <div className="hm-report" aria-hidden="true">
           <div className="hm-report-head">
-            <span className="hm-report-label">Sample report</span>
-            <span className="hm-report-url">example.com</span>
+            <span className="hm-report-label">RESTAURANT REPORT</span>
+            <span className="hm-report-url">sample-restaurant.com</span>
           </div>
 
           <div className="hm-report-block">
-            <span className="hm-report-key">Page title</span>
-            <p>Example Domain | Sample Website</p>
+            <span className="hm-report-key">Restaurant</span>
+            <p>The Golden Table</p>
           </div>
 
           <div className="hm-report-block">
-            <span className="hm-report-key">Headings</span>
+            <span className="hm-report-key">Restaurant details</span>
             <ul>
-              <li><b>H1</b> Welcome to example.com</li>
-              <li><b>H2</b> About Us</li>
-              <li><b>H2</b> Our Services</li>
+              <li><b>01</b> Multi-cuisine</li>
+              <li><b>02</b> Rating: 4.5/5 (sample)</li>
+              <li><b>03</b> Opening hours</li>
             </ul>
           </div>
 
           <div className="hm-report-block">
-            <span className="hm-report-key">Links</span>
+            <span className="hm-report-key">Sample menu</span>
             <ul>
-              <li><b>01</b> /about</li>
-              <li><b>02</b> /contact</li>
+              <li><b>₹299</b> Signature Dish</li>
+              <li><b>₹399</b> Chef's Special</li>
+              <li><b>₹149</b> Dessert Special</li>
             </ul>
           </div>
         </div>
       </section>
 
-      {/* Steps */}
       <section className="hm-steps">
         <article>
           <span className="hm-step-no">01</span>
-          <h3>Enter a URL</h3>
-          <p>Start with the website you want to inspect.</p>
+          <h3>Enter a restaurant URL</h3>
+          <p>Provide the website address of the restaurant you want to explore.</p>
         </article>
 
         <article>
           <span className="hm-step-no">02</span>
-          <h3>Review the report</h3>
-          <p>Browse headings, links and page details in one view.</p>
+          <h3>Explore restaurant details</h3>
+          <p>Review sample information about cuisine, location, menu, and links.</p>
         </article>
 
         <article>
           <span className="hm-step-no">03</span>
-          <h3>Return anytime</h3>
-          <p>Every result is stored in your History page.</p>
+          <h3>Save and revisit</h3>
+          <p>Records are saved in MongoDB and can be revisited through History.</p>
         </article>
       </section>
 
-      {/* About */}
       <section className="hm-about" id="about">
         <div className="hm-about-copy">
-          <span className="hm-eyebrow">About</span>
-          <h2>About this project</h2>
+          <span className="hm-eyebrow">ABOUT THE PROJECT</span>
+          <h2>A closer look at restaurant websites.</h2>
           <p>
-            Web Scraper is a minor project built for CSE 3395. It takes a
-            website address and turns it into a structured report covering
-            the page title, headings and links.
+            Restaurant Web Scraper is a CSE 3395 minor project that
+            demonstrates how restaurant website information can be organized
+            into a structured report.
           </p>
           <p>
-            Each report is saved to a database, so you can open the History
-            page at any time and revisit earlier results.
+            The application uses React for its interface, Express and Node.js
+            for the backend API, and MongoDB for storing and retrieving records.
           </p>
         </div>
 
@@ -242,22 +278,22 @@ export default function Home() {
             <dd>CSE 3395 · Minor Project</dd>
           </div>
           <div>
-            <dt>Stack</dt>
+            <dt>Technology</dt>
             <dd>React, Node.js, Express, MongoDB</dd>
           </div>
           <div>
-            <dt>Collects</dt>
-            <dd>Page title, headings, links</dd>
+            <dt>Information</dt>
+            <dd>Restaurant details, menu items, and links</dd>
           </div>
           <div>
-            <dt>Mode</dt>
-            <dd>Demo (sample data)</dd>
+            <dt>Current mode</dt>
+            <dd>Demonstration using sample data</dd>
           </div>
         </dl>
       </section>
 
       <footer className="hm-footer">
-        Web Scraper &nbsp;·&nbsp; Minor Project &nbsp;·&nbsp; CSE 3395
+        Restaurant Web Scraper · Minor Project · CSE 3395
       </footer>
     </main>
   );
